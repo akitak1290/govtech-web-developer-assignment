@@ -45,7 +45,7 @@ export default function SearchResult(props: SearchResultProps) {
       </p>
       {result.ResultItems.map((item, index) => {
         return (
-          <div key={index} className="*:mb-3 mb-8" aria-label="search-result-item" >
+          <div key={index} className="*:mb-3 mb-8 flex flex-col" aria-label="search-result-item" >
             <a href={item.DocumentURI} className="inline-block hover:underline">
               <HighlightedParagraph
                 data={item.DocumentTitle}
@@ -54,10 +54,10 @@ export default function SearchResult(props: SearchResultProps) {
             </a>
             <HighlightedParagraph data={item.DocumentExcerpt} />
             <a
-              className="text-gray-500 inline-block hover:underline"
+              className="text-gray-500 hover:underline"
               href={item.DocumentURI}
             >
-              {item.DocumentURI}
+              <p className="break-all sm:break-normal">{item.DocumentURI}</p>
             </a>
           </div>
         );
