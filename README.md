@@ -2,17 +2,14 @@
 
 This project is a submission for the [GovTech's Fullstack developer assignment](https://gist.github.com/yuhong90/b5544baebde4bfe9fe2d12e8e5502cbf), built with ReactJS and Typescript, built with Vite, with automated testing for quality assurance.
 
-## 🌐 Deployment
-A demo application is deployed as a GitHub Page [here]()
-
 ## 💻 Table of Contents
 
-- 🗄️ [Project Structure](#project-structure)
-- ⚙️ [Installation](#installation)
-- 🚄 [Run the App](#run-the-app)
-- 🧪 [Run Unit Tests](#run-tests)
-- 🧱 [Technologies Used](#technologies-used)
-- 📷 [Preview](#preview)
+- 🗄️ [Project Structure](#🗄️-project-structure)
+- ⚙️ [Installation](#⚙️-installation)
+- 🚄 [Run the App](#🚄-run-the-app)
+- 🧪 [Run Unit Tests](#🧪-run-unit-tests)
+- 🧱 [Technologies Used](#🧱-technologies-used)
+- 📷 [Preview](#📷-preview)
 
 ## 🗄️ Project Structure
 ```
@@ -26,7 +23,7 @@ A demo application is deployed as a GitHub Page [here]()
 └───testing             # test utilities and mock
 ```
 
-## ⚙️️ Installation
+## ⚙️ Installation 
 
 ### Prerequisites
 Ensure that you have the following installed:
