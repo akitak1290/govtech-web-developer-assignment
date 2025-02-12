@@ -1,18 +1,37 @@
 # Web Dev Tech Assignment for GovTech 2025
 
-Assignment submission for the [GovTech's Fullstack developer assignment](https://gist.github.com/yuhong90/b5544baebde4bfe9fe2d12e8e5502cbf)
+This project is a submission for the [GovTech's Fullstack developer assignment](https://gist.github.com/yuhong90/b5544baebde4bfe9fe2d12e8e5502cbf), built with ReactJS and Typescript, built with Vite, with automated testing for quality assurance.
 
-## Table of Contents
+## 🌐 Deployment
+A demo application is deployed as a GitHub Page [here]()
 
-- [Installation](#installation)
-- [Run the App](#run-the-app)
-- [Run Unit Tests](#run-tests)
-- [Assumptions](#assumptions)
-- [Preview](#preview)
+## 💻 Table of Contents
 
-## Installation
+- 🗄️ [Project Structure](#project-structure)
+- ⚙️ [Installation](#installation)
+- 🚄 [Run the App](#run-the-app)
+- 🧪 [Run Unit Tests](#run-tests)
+- 🧱 [Technologies Used](#technologies-used)
+- 📷 [Preview](#preview)
 
-To install and run this project on your local machine, follow these steps:
+## 🗄️ Project Structure
+```
+├───app                 # main application layer
+├───assets              # additional assets folder
+├───components          # shared minimal state UI components
+├───features            # shared features
+│   └───feature
+│       ├───api         # api services used by the feature
+│       └───components  # locally scope components
+└───testing             # test utilities and mock
+```
+
+## ⚙️️ Installation
+
+### Prerequisites
+Ensure that you have the following installed:
+- Node.js (LTS version recommended)
+- npm (comes with Node.js)
 
 1. Clone the repository
 
@@ -27,30 +46,40 @@ To install and run this project on your local machine, follow these steps:
     npm install
    ```
 
-## Run the App
+## 🚄 Run the App
 
-1. Run command
+This will start a development server on port 5173 by default.
 
    ```bash
    npm run dev
    ```
+Open your browser and go to http://localhost:5173
 
-2. Open your browser and go to http://localhost:5173
-
-## Run Unit Tests
+## 🧪 Run Unit Tests
 
    ```bash
    npm run test
    ```
+Test library used:
+- [Jest](https://jestjs.io/)
+- [React Testing Library](https://testing-library.com/)
 
-You can also go to coverage folder to see the test coverage report
+## 🧱 Technologies Used
+- **Frontend**: ReactJS, Typescript
+- **Build tool**: Vite
+- **Testing tool**: React Testing Library, Jest 
 
-## Assumptions
-As we are using a mock API to get data only for the query string "child", the suggestion list and search result will only work with that query string.
-
-## Preview
-Typeahead suggestion dropdown
+## 📷 Preview
+**Typeahead**\
 ![typeahead](/docs/typeahead.png)
 
-Search result
+**Search result**\
 ![reach_result](/docs/search_result.png)
+
+### Responsiveness
+
+**Typeahead mobile**\
+![typeahead_mobile](/docs/typeahead_mobile.png)
+
+**Search result mobile**\
+![search_result_mobile](/docs/search_result_mobile.png)
