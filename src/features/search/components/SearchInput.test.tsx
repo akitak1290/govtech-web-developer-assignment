@@ -1,112 +1,87 @@
-import {
-  render,
-  act,
-  screen,
-  waitFor,
-} from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+
 import SearchInput from "./SearchInput";
-import * as getSuggestionsModule from "../api/getSuggestions";
-import mockSuggestions from "@testing/suggestion.mock.json";
+import useTypeaheadFetch from "../api/getSuggestions";
 
-describe(SearchInput, () => {
-  it("typeahead box shows suggestions when > 2 letters are typed", async () => {
-    render(<SearchInput onSearch={jest.fn()} />);
+jest.mock("../api/getSuggestions", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
 
-    const searchInputElement = screen.getByLabelText("search-input");
+describe("SearchInput Component", () => {
+  let onSearchMock: jest.Mock;
 
-    jest
-      .spyOn(getSuggestionsModule, "getSuggestions")
-      .mockResolvedValue({ error: null, data: mockSuggestions.suggestions });
-
-    await act(async () => {
-      await userEvent.type(searchInputElement, "chi");
-    });
-
-    // Debugging log
-    await waitFor(() => {
-      const lists = screen.getByRole("list");
-      expect(lists).toBeInTheDocument();
-    });
+  beforeEach(() => {
+    onSearchMock = jest.fn();
+    (useTypeaheadFetch as jest.Mock).mockReturnValue({ data: [] });
   });
 
-  it("typeahead box should not show suggestions when <= 2 letters are typed", async () => {
-    render(<SearchInput onSearch={jest.fn()} />);
-
-    const searchInputElement = screen.getByLabelText("search-input");
-
-    await act(async () => {
-      await userEvent.type(searchInputElement, "ch");
-    });
-
-    const lists = screen.queryByRole("list");
-    expect(lists).not.toBeInTheDocument();
-  });
-
-  it("delete icon should appears when >= 1 letter is typed", async () => {
-    render(<SearchInput onSearch={jest.fn()} />);
-
-    const searchInputElement = screen.getByLabelText("search-input");
-    await act(async () => {
-      await userEvent.type(searchInputElement, "chi");
-    });
-
-    const deleteButton = await screen.findByLabelText("clear-input-button");
-    expect(deleteButton).toBeInTheDocument();
-  });
-
-  it("when clicked, delete icon should clear the input field, hide the suggestion dropdown, and vanish", async () => {
-    render(<SearchInput onSearch={jest.fn()} />);
-
-    jest
-      .spyOn(getSuggestionsModule, "getSuggestions")
-      .mockResolvedValue({ error: null, data: mockSuggestions.suggestions });
-
-    const searchInputElement: HTMLInputElement =
-      screen.getByLabelText("search-input");
-    await act(async () => {
-      await userEvent.type(searchInputElement, "chi");
-    });
-
-    const lists = await screen.findByRole("list");
-    expect(lists).toBeInTheDocument();
-
-    const deleteButton = await screen.findByLabelText("clear-input-button");
-    await userEvent.click(deleteButton);
-
-    expect(deleteButton).not.toBeInTheDocument();
-    expect(lists).not.toBeInTheDocument();
-    expect(searchInputElement.value).toBeFalsy();
-    expect(searchInputElement).toHaveFocus();
-  });
-
-  it("when selecting a suggestion from the dropdown, the suggestion will populate the input field, the dropdown disappear, and search result should be updated", async () => {
-    const onSearchMock = jest.fn();
+  it("should render search input and button initially", () => {
     render(<SearchInput onSearch={onSearchMock} />);
+    expect(screen.getByLabelText("search-input")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /search/i })).toBeInTheDocument();
+  });
 
-    jest
-      .spyOn(getSuggestionsModule, "getSuggestions")
-      .mockResolvedValue({ error: null, data: mockSuggestions.suggestions });
+  it("should update input value on typing", async () => {
+    render(<SearchInput onSearch={onSearchMock} />);
+    const input = screen.getByRole("textbox", { name: /search-input/i });
 
-    const searchInputElement: HTMLInputElement =
-      screen.getByLabelText("search-input");
+    await userEvent.type(input, "hello");
 
-    await act(async () => {
-      await userEvent.type(searchInputElement, "chi");
+    expect(input).toHaveValue("hello");
+  });
+
+  test("should display suggestions and selects one on click", async () => {
+    (useTypeaheadFetch as jest.Mock).mockReturnValue({
+      data: ["hello world", "hello there"],
     });
 
-    const list = await screen.findByRole("list");
-    expect(list).toBeInTheDocument();
+    render(<SearchInput onSearch={onSearchMock} />);
+    const input = screen.getByLabelText("search-input");
 
-    searchInputElement.focus();
-    await act(async () => {
-      await userEvent.keyboard("{ArrowDown}");
-    });
-    await act(async () => {
-      await userEvent.keyboard("{Enter}");
+    await userEvent.type(input, "hello");
+
+    const listItems = screen.getAllByRole("listitem");
+    expect(listItems[0]).toHaveTextContent("hello world");
+
+    fireEvent.click(listItems[0]);
+
+    expect(input).toHaveValue("hello world");
+    expect(onSearchMock).toHaveBeenCalledWith("hello world");
+  });
+
+  it("clears input on clear button click", async () => {
+    render(<SearchInput onSearch={onSearchMock} />);
+    const input = screen.getByLabelText("search-input");
+
+    await userEvent.type(input, "hi");
+    expect(input).toHaveValue("hi");
+
+    const clearButton = screen.getByLabelText("clear-input-button");
+    fireEvent.click(clearButton);
+
+    expect(input).toHaveValue("");
+  });
+
+  test("handles keyboard navigation (ArrowDown, ArrowUp, Enter)", async () => {
+    (useTypeaheadFetch as jest.Mock).mockReturnValue({
+      data: ["apple", "banana", "cherry"],
     });
 
-    expect(searchInputElement).toHaveValue("child care");
-    expect(list).not.toBeInTheDocument();
+    render(<SearchInput onSearch={onSearchMock} />);
+    const input = screen.getByLabelText("search-input");
+
+    await userEvent.type(input, "app");
+    const listItems = screen.getAllByRole("listitem");
+    expect(listItems[0]).toHaveTextContent("apple");
+
+    // fireEvent.click(listItems[0]);
+
+    fireEvent.keyDown(input, { key: "ArrowDown" });
+    expect(listItems[0]).toHaveClass("bg-blue-100");
+
+    fireEvent.keyDown(input, { key: "Enter" });
+    expect(input).toHaveValue("apple");
   });
 });

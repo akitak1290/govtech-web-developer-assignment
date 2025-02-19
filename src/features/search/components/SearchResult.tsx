@@ -42,13 +42,13 @@ export default function SearchResult(props: SearchResultProps) {
   return (
     <div>
       {error && <p>{error}</p>}
-      {loading && <p>{loading}</p>}
-      {data && data.TotalNumberOfResults === 0 && "No results found"}
+      {loading && <p>Loading...</p>}
+      {searchString !== "" && !data && !loading && <p>No results found</p>}
       {data && data.TotalNumberOfResults > 0 && (
         <div>
           <p className="font-bold py-8 text-xl">
-            Showing 1-{data.TotalNumberOfResults} of {data.TotalNumberOfResults}{" "}
-            results
+            Showing 1-{Math.min(data.TotalNumberOfResults, data.PageSize)} of{" "}
+            {data.TotalNumberOfResults} results
           </p>
           {data.ResultItems.map((item, index) => {
             return (

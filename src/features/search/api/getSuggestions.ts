@@ -52,17 +52,17 @@ export default function useTypeaheadFetch(searchString: string) {
     }, 300);
 
     return () => clearTimeout(handler);
-  }, [debouncedString]);
+  }, [searchString]);
 
   useEffect(() => {
-    if (!searchString || searchString.length <= 2) {
+    if (!debouncedString || debouncedString.length <= 2) {
       setData(null);
       return;
     }
 
     const getData = async () => {
       setLoading(true);
-      const { data, error } = await getSuggestions(searchString);
+      const { data, error } = await getSuggestions(debouncedString);
 
       if (error) {
         setError(error);
@@ -72,7 +72,7 @@ export default function useTypeaheadFetch(searchString: string) {
       setLoading(false);
     };
     getData();
-  }, [searchString, setError, clearError]);
+  }, [debouncedString, setError, clearError]);
 
   return { data, loading, error };
 }

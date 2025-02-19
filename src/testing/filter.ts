@@ -10,7 +10,7 @@ export function filterSuggestionList(
 export function filterResultList(
   data: apiSearchResponse,
   searchString: string
-): apiSearchResponse {
+): apiSearchResponse | null {
   const resultItems = data.ResultItems.filter(
     (item) =>
       item.DocumentTitle.Text.toLowerCase().includes(
@@ -21,10 +21,12 @@ export function filterResultList(
       )
   );
 
-  return {
-    TotalNumberOfResults: resultItems.length,
-    Page: data.Page,
-    PageSize: data.PageSize,
-    ResultItems: resultItems,
-  };
+  return resultItems.length > 0
+    ? {
+        TotalNumberOfResults: resultItems.length,
+        Page: data.Page,
+        PageSize: data.PageSize,
+        ResultItems: resultItems,
+      }
+    : null;
 }

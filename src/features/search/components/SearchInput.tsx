@@ -26,15 +26,24 @@ export default function SearchInput(props: SearchInputProps) {
   const { onSearch } = props;
 
   const [searchString, setSearchString] = useState("");
-  const { data: suggestions } = useTypeaheadFetch(searchString);
   const [suggestionIndex, setSuggestionIndex] = useState(-1);
 
+  const { data: suggestions } = useTypeaheadFetch(searchString);
+
+  const typeaheadListRef = useRef<HTMLUListElement | null>(null);
   const searchRef = useRef<HTMLInputElement | null>(null);
 
   useEffect(() => {
     // component first mount
     searchRef.current?.focus();
   }, []);
+
+  useEffect(() => {
+    if (!suggestions?.length && typeaheadListRef.current) {
+      typeaheadListRef.current.style.display = 'none';
+    }
+
+  }, [suggestions]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (searchRef.current) searchRef.current.value = e.target.value;
@@ -44,6 +53,7 @@ export default function SearchInput(props: SearchInputProps) {
 
   const handleSuggestionClick = (suggestion: string) => {
     if (searchRef.current) searchRef.current.value = suggestion;
+    if (typeaheadListRef.current) typeaheadListRef.current.style.display = 'none';
     setSearchString("");
 
     // for 2b
@@ -52,6 +62,7 @@ export default function SearchInput(props: SearchInputProps) {
 
   const handleClearInput = () => {
     setSearchString("");
+    if (typeaheadListRef.current) typeaheadListRef.current.style.display = 'none';
     if (searchRef.current) {
       searchRef.current.focus();
       searchRef.current.value = "";
@@ -66,6 +77,7 @@ export default function SearchInput(props: SearchInputProps) {
 
     switch (e.key) {
       case "Escape":
+        if (typeaheadListRef.current) typeaheadListRef.current.style.display = 'none';
         setSearchString("");
         break;
       case "Enter":
@@ -73,6 +85,7 @@ export default function SearchInput(props: SearchInputProps) {
         if (suggestions.length > 0 && suggestionIndex >= 0) {
           searchRef.current!.value = suggestions[suggestionIndex];
         }
+        if (typeaheadListRef.current) typeaheadListRef.current.style.display = 'none';
         setSearchString("");
         setSuggestionIndex(-1);
         break;
@@ -101,6 +114,8 @@ export default function SearchInput(props: SearchInputProps) {
       className="relative w-full flex"
       onSubmit={(e: React.FormEvent) => {
         e.preventDefault();
+        setSearchString("");
+        if (typeaheadListRef.current) typeaheadListRef.current.style.display = 'none';
         onSearch(searchRef.current?.value || "");
       }}
     >
@@ -115,7 +130,7 @@ export default function SearchInput(props: SearchInputProps) {
         {searchRef.current && searchRef.current.value.length >= 1 && (
           <button
             type="button"
-            className="absolute inset-y-0 right-4 flex items-center justify-center text-gray-500 hover:text-gray-700 focus:outline-none"
+            className="absolute inset-y-0 right-4 flex items-center justify-center text-gray-500 hover:text-gray-700 focus:outline-'none'"
             onClick={() => handleClearInput()}
             aria-label="clear-input-button"
           >
@@ -126,6 +141,7 @@ export default function SearchInput(props: SearchInputProps) {
           <ul
             className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg"
             aria-label="typeahead-list"
+            ref={typeaheadListRef}
           >
             {suggestions.map((suggestion, index) => (
               <li
@@ -137,7 +153,10 @@ export default function SearchInput(props: SearchInputProps) {
                 onMouseEnter={() => setSuggestionIndex(index)}
                 onMouseDown={(e) => e.preventDefault()} // Prevent blur on click
               >
-                {highlighText(suggestion, searchRef.current!.value)}
+                {highlighText(
+                  suggestion,
+                  searchRef.current ? searchRef.current.value : ""
+                )}
               </li>
             ))}
           </ul>
