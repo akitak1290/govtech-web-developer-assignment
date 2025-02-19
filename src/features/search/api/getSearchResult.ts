@@ -1,5 +1,7 @@
 import { searchResultEndpoint as mockSearchResultEndpoint } from "@/testing/api.mock";
 import { apiSearchResponse, apiSearchResponseParsed } from "../types";
+import { useState, useEffect } from "react";
+import { useError } from "@/hooks/useError";
 
 // const searchResultEndpoint = ""; // update with real endpoint
 const searchResultEndpoint = mockSearchResultEndpoint;
@@ -20,6 +22,12 @@ export async function getSearchResult(
 
     const data: apiSearchResponse = await response.json();
     return {
+      // data: {
+      //   TotalNumberOfResults: data.TotalNumberOfResults,
+      //   Page: data.Page,
+      //   PageSize: data.PageSize,
+      //   ResultItems: data.ResultItems.filter({}),
+      // },
       data: data,
       error: null,
     };
@@ -32,31 +40,31 @@ export async function getSearchResult(
   }
 }
 
-// export default function useSearch(url: string){
-//     const [data, setData] = useState<apiSearchResponse | null>(null);
-//     const [loading, setLoading] = useState(false);
-//     const [error, setError] = useState<string | null>(null);
+export default function useSearchFetch(searchString: string) {
+  const [data, setData] = useState<apiSearchResponse | null>(null);
+  const [loading, setLoading] = useState(false);
+  const { error, setError, clearError } = useError();
 
-//     useEffect(() => {
-//         if (!url) {
-//             setData(null);
-//             return;
-//         }
+  useEffect(() => {
+    if (!searchString) {
+      setData(null);
+      clearError();
+      return;
+    }
 
-//         const getData = async () => {
-//             setLoading(true);
-//             try {
-//                 const data = await fetchSearchResult(url);
-//                 setData(data);
-//             } catch (error) {
-//                 setError(`Failed to fetch from ${url}`);
-//             } finally {
-//                 setLoading(false);
-//             }
-//         }
+    const getData = async () => {
+      setLoading(true);
+      const { data, error } = await getSearchResult(searchString);
 
-//         getData();
-//     },[]);
+      if (error) {
+        setError(error);
+      } else {
+        setData(data);
+      }
+      setLoading(false);
+    };
+    getData();
+  }, [searchString, setError, clearError]);
 
-//     return { data, loading, error };
-// }
+  return { data, loading, error };
+}

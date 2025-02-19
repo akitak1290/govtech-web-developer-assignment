@@ -1,12 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import Button from "@components/Button";
 import Input from "@components/Input";
-import { getSuggestions } from "../api/getSuggestions";
-import { apiSearchSuggestionParsed } from "../types";
+import useTypeaheadFetch from "../api/getSuggestions";
 import SearchIcon from "./SearchIcon";
 
 interface SearchInputProps {
-  onSearch: (url: string) => void;
+  onSearch: (searchString: string) => void;
 }
 
 function highlighText(text: string, searchString: string): JSX.Element {
@@ -26,8 +25,8 @@ function highlighText(text: string, searchString: string): JSX.Element {
 export default function SearchInput(props: SearchInputProps) {
   const { onSearch } = props;
 
-  // const [searchString, setSearchString] = useState("");
-  const [suggestions, setSuggestions] = useState<string[]>([]);
+  const [searchString, setSearchString] = useState("");
+  const { data: suggestions } = useTypeaheadFetch(searchString);
   const [suggestionIndex, setSuggestionIndex] = useState(-1);
 
   const searchRef = useRef<HTMLInputElement | null>(null);
@@ -37,58 +36,22 @@ export default function SearchInput(props: SearchInputProps) {
     searchRef.current?.focus();
   }, []);
 
-  useEffect(() => {
-    const handleInputChange = async () => {
-      if (!searchRef.current || searchRef.current.value.length <= 2) return;
-
-      // debounce to reduce query to server
-      const delay = setTimeout(async () => {
-        const result: apiSearchSuggestionParsed = await getSuggestions(
-          searchRef.current?.value || ""
-        );
-
-        if (!result.data) {
-          setSuggestions([]);
-          return;
-        }
-
-        const suggestions = result.data;
-        setSuggestions(
-          suggestions.length > 6 ? suggestions.slice(0, 7) : suggestions
-        );
-      }, 300);
-
-      // Cleanup timeout on effect cleanup
-      return () => clearTimeout(delay);
-    };
-
-    if (searchRef.current)
-      searchRef.current!.addEventListener("input", handleInputChange);
-
-    return () => {
-      if (searchRef.current)
-        searchRef.current.removeEventListener("input", handleInputChange);
-    };
-  }, []);
-
-  const handlerInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (searchRef.current) searchRef.current.value = e.target.value;
     // for 2a
-    if (e.target.value.length <= 2) {
-      setSuggestions([]);
-    }
+    setSearchString(e.target.value);
   };
 
   const handleSuggestionClick = (suggestion: string) => {
-    // setSearchString(suggestion);
     if (searchRef.current) searchRef.current.value = suggestion;
-    setSuggestions([]);
+    setSearchString("");
+
     // for 2b
     onSearch(suggestion);
   };
 
   const handleClearInput = () => {
-    setSuggestions([]);
+    setSearchString("");
     if (searchRef.current) {
       searchRef.current.focus();
       searchRef.current.value = "";
@@ -98,16 +61,19 @@ export default function SearchInput(props: SearchInputProps) {
   // to handler 2d
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     let newIndex;
+
+    if (!suggestions) return;
+
     switch (e.key) {
       case "Escape":
-        setSuggestions([]);
+        setSearchString("");
         break;
       case "Enter":
         // extend the default submit form
         if (suggestions.length > 0 && suggestionIndex >= 0) {
           searchRef.current!.value = suggestions[suggestionIndex];
         }
-        setSuggestions([]);
+        setSearchString("");
         setSuggestionIndex(-1);
         break;
       case "ArrowUp":
@@ -140,7 +106,7 @@ export default function SearchInput(props: SearchInputProps) {
     >
       <div className="relative grow">
         <Input
-          onChange={handlerInputChange}
+          onChange={handleInputChange}
           placeholder="search something..."
           onKeyDown={handleKeyDown}
           aria-label="search-input"
@@ -156,7 +122,7 @@ export default function SearchInput(props: SearchInputProps) {
             x
           </button>
         )}
-        {suggestions.length > 0 && (
+        {suggestions && suggestions.length > 0 && (
           <ul
             className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg"
             aria-label="typeahead-list"

@@ -1,4 +1,5 @@
-import { apiSearchResponse, DocumentExcerpt } from "../types";
+import { DocumentExcerpt } from "../types";
+import useSearchFetch from "../api/getSearchResult";
 
 interface HighlightedParagraphProps {
   data: DocumentExcerpt;
@@ -13,7 +14,7 @@ function HighlightedParagraph(props: HighlightedParagraphProps) {
   const { Text, Highlights } = props.data;
   const parsedText: (string | JSX.Element)[] = [];
 
-  if (Highlights.length == 0) 
+  if (Highlights.length == 0)
     return <p className={`${props.className}`}>{Text}</p>;
   // assume that @Highlight objects are in order
   let startIndex = 0;
@@ -31,37 +32,53 @@ function HighlightedParagraph(props: HighlightedParagraphProps) {
 }
 
 interface SearchResultProps {
-  result: apiSearchResponse;
+  searchString: string;
 }
 
 export default function SearchResult(props: SearchResultProps) {
-  const { result } = props;
+  const { searchString } = props;
+  const { data, loading, error } = useSearchFetch(searchString);
 
   return (
     <div>
-      <p className="font-bold py-8 text-xl">
-        Showing {result.Page}-{result.PageSize} of {result.TotalNumberOfResults}{" "}
-        results
-      </p>
-      {result.ResultItems.map((item, index) => {
-        return (
-          <div key={index} className="*:mb-3 mb-8 flex flex-col" aria-label="search-result-item" >
-            <a href={item.DocumentURI} className="inline-block hover:underline">
-              <HighlightedParagraph
-                data={item.DocumentTitle}
-                className="text-blue-500 font-semibold text-xl"
-              />
-            </a>
-            <HighlightedParagraph data={item.DocumentExcerpt} />
-            <a
-              className="text-gray-500 hover:underline"
-              href={item.DocumentURI}
-            >
-              <p className="break-all sm:break-normal">{item.DocumentURI}</p>
-            </a>
-          </div>
-        );
-      })}
+      {error && <p>{error}</p>}
+      {loading && <p>{loading}</p>}
+      {data && (
+        <div>
+          <p className="font-bold py-8 text-xl">
+            Showing {data.Page}-{data.PageSize} of {data.TotalNumberOfResults}{" "}
+            results
+          </p>
+          {data.ResultItems.map((item, index) => {
+            return (
+              <div
+                key={index}
+                className="*:mb-3 mb-8 flex flex-col"
+                aria-label="search-result-item"
+              >
+                <a
+                  href={item.DocumentURI}
+                  className="inline-block hover:underline"
+                >
+                  <HighlightedParagraph
+                    data={item.DocumentTitle}
+                    className="text-blue-500 font-semibold text-xl"
+                  />
+                </a>
+                <HighlightedParagraph data={item.DocumentExcerpt} />
+                <a
+                  className="text-gray-500 hover:underline"
+                  href={item.DocumentURI}
+                >
+                  <p className="break-all sm:break-normal">
+                    {item.DocumentURI}
+                  </p>
+                </a>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

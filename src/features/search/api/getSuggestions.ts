@@ -1,12 +1,14 @@
 import { suggestionEndpoint as mockSuggestionEndpoint } from "@/testing/api.mock";
 import { apiSearchSuggestion, apiSearchSuggestionParsed } from "../types";
+import { useEffect, useState } from "react";
+import { useError } from "@/hooks/useError";
 // import { useEffect, useState } from "react";
 
 // const suggestionEndpoint = ""; // update with real endpoint
 const suggestionEndpoint = mockSuggestionEndpoint;
 
 export async function getSuggestions(
-  queryString: string
+  searchString: string
 ): Promise<apiSearchSuggestionParsed> {
   try {
     const response = await fetch(suggestionEndpoint);
@@ -20,15 +22,11 @@ export async function getSuggestions(
     }
 
     const data: apiSearchSuggestion = await response.json();
-    if (!data.stemmedQueryTerm.includes(queryString)) {
-      return {
-        data: null,
-        error: "No suggestions found",
-      };
-    }
 
     return {
-      data: data.suggestions,
+      data: data.suggestions.filter((suggestion: string) =>
+        suggestion.includes(searchString)
+      ),
       error: null,
     };
   } catch (error) {
@@ -40,31 +38,40 @@ export async function getSuggestions(
   }
 }
 
-// export default function useSearch(url: string){
-//     const [data, setData] = useState<apiSearchResponse | null>(null);
-//     const [loading, setLoading] = useState(false);
-//     const [error, setError] = useState<string | null>(null);
+export default function useTypeaheadFetch(searchString: string) {
+  const [debouncedString, setDebouncedString] = useState(searchString);
 
-//     useEffect(() => {
-//         if (!url) {
-//             setData(null);
-//             return;
-//         }
+  const [data, setData] = useState<string[] | null>(null);
+  const [loading, setLoading] = useState(false);
+  const { error, setError, clearError } = useError();
 
-//         const getData = async () => {
-//             setLoading(true);
-//             try {
-//                 const data = await fetchSearchResult(url);
-//                 setData(data);
-//             } catch (error) {
-//                 setError(`Failed to fetch from ${url}`);
-//             } finally {
-//                 setLoading(false);
-//             }
-//         }
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedString(searchString);
+    }, 300);
 
-//         getData();
-//     },[]);
+    return () => clearTimeout(handler);
+  }, [debouncedString]);
 
-//     return { data, loading, error };
-// }
+  useEffect(() => {
+    if (!searchString || searchString.length <= 2) {
+      setData(null);
+      return;
+    }
+
+    const getData = async () => {
+      setLoading(true);
+      const { data, error } = await getSuggestions(searchString);
+
+      if (error) {
+        setError(error);
+      } else {
+        setData(data && data.length > 6 ? data.slice(0, 7) : data);
+      }
+      setLoading(false);
+    };
+    getData();
+  }, [searchString, setError, clearError]);
+
+  return { data, loading, error };
+}
