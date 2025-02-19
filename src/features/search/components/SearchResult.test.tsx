@@ -11,12 +11,6 @@ jest.mock("../api/getSearchResult", () => ({
 }));
 
 describe(SearchResult, () => {
-  let onSearchMock: jest.Mock;
-
-  beforeAll(() => {
-    onSearchMock = jest.fn();
-  });
-
   it("search result should show when a valid query string is entered", async () => {
     (useSearchFetch as jest.Mock).mockReturnValue({ data: mockSearchResult }); // Default no suggestions
 

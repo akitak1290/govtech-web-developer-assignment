@@ -1,8 +1,8 @@
 import { getSuggestions } from "@features/search/api/getSuggestions";
 import useTypeaheadFetch from "@features/search/api/getSuggestions";
 import { renderHook, waitFor } from "@testing-library/react";
-// import { suggestionEndpoint as mockSuggestionEndpoint } from "@/testing/api.mock";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (globalThis as any).fetch = jest.fn();
 
 describe("getSuggestions", () => {
