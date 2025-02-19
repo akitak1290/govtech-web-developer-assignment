@@ -20,6 +20,7 @@ This project is a submission for the [GovTech's Fullstack developer assignment](
 │   └───feature
 │       ├───api         # api services used by the feature
 │       └───components  # locally scope components
+├───hooks               # shared hooks
 └───testing             # test utilities and mock
 ```
 
@@ -57,6 +58,8 @@ Open your browser and go to http://localhost:5173
    ```bash
    npm run test
    ```
+![test_coverage](/docs/test_coverage.png)
+
 Test library used:
 - [Jest](https://jestjs.io/)
 - [React Testing Library](https://testing-library.com/)
