@@ -43,10 +43,11 @@ export default function SearchResult(props: SearchResultProps) {
     <div>
       {error && <p>{error}</p>}
       {loading && <p>{loading}</p>}
-      {data && (
+      {data && data.TotalNumberOfResults === 0 && "No results found"}
+      {data && data.TotalNumberOfResults > 0 && (
         <div>
           <p className="font-bold py-8 text-xl">
-            Showing {data.Page}-{data.PageSize} of {data.TotalNumberOfResults}{" "}
+            Showing 1-{data.TotalNumberOfResults} of {data.TotalNumberOfResults}{" "}
             results
           </p>
           {data.ResultItems.map((item, index) => {

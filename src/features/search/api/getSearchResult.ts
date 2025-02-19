@@ -2,12 +2,13 @@ import { searchResultEndpoint as mockSearchResultEndpoint } from "@/testing/api.
 import { apiSearchResponse, apiSearchResponseParsed } from "../types";
 import { useState, useEffect } from "react";
 import { useError } from "@/hooks/useError";
+import { filterResultList } from "@/testing/filter";
 
 // const searchResultEndpoint = ""; // update with real endpoint
 const searchResultEndpoint = mockSearchResultEndpoint;
 
 export async function getSearchResult(
-  _: string // update when have real endpoint
+  searchString: string // update when have real endpoint
 ): Promise<apiSearchResponseParsed> {
   try {
     const response = await fetch(searchResultEndpoint);
@@ -22,13 +23,7 @@ export async function getSearchResult(
 
     const data: apiSearchResponse = await response.json();
     return {
-      // data: {
-      //   TotalNumberOfResults: data.TotalNumberOfResults,
-      //   Page: data.Page,
-      //   PageSize: data.PageSize,
-      //   ResultItems: data.ResultItems.filter({}),
-      // },
-      data: data,
+      data: filterResultList(data, searchString),
       error: null,
     };
   } catch (error) {

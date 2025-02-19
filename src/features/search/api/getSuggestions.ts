@@ -2,6 +2,7 @@ import { suggestionEndpoint as mockSuggestionEndpoint } from "@/testing/api.mock
 import { apiSearchSuggestion, apiSearchSuggestionParsed } from "../types";
 import { useEffect, useState } from "react";
 import { useError } from "@/hooks/useError";
+import { filterSuggestionList } from "@/testing/filter";
 // import { useEffect, useState } from "react";
 
 // const suggestionEndpoint = ""; // update with real endpoint
@@ -25,7 +26,7 @@ export async function getSuggestions(
 
     return {
       data: data.suggestions.filter((suggestion: string) =>
-        suggestion.includes(searchString)
+        filterSuggestionList(suggestion, searchString)
       ),
       error: null,
     };

@@ -1,9 +1,30 @@
-import { apiSearchSuggestion } from "@/features/search/types";
+import { apiSearchResponse } from "@/features/search/types";
 
+export function filterSuggestionList(
+  suggestion: string,
+  searchString: string
+): boolean {
+  return suggestion.includes(searchString);
+}
 
-export function filterSuggestionList(list: apiSearchSuggestion, queryString: string) {
-    return {
-        "stemmedQueryTerm": queryString,
-        "suggestions": list.suggestions.filter(suggestion => suggestion.includes(queryString.toLocaleLowerCase())),
-    }
+export function filterResultList(
+  data: apiSearchResponse,
+  searchString: string
+): apiSearchResponse {
+  const resultItems = data.ResultItems.filter(
+    (item) =>
+      item.DocumentTitle.Text.toLowerCase().includes(
+        searchString.toLowerCase()
+      ) ||
+      item.DocumentExcerpt.Text.toLowerCase().includes(
+        searchString.toLowerCase()
+      )
+  );
+
+  return {
+    TotalNumberOfResults: resultItems.length,
+    Page: data.Page,
+    PageSize: data.PageSize,
+    ResultItems: resultItems,
+  };
 }
