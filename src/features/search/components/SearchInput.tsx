@@ -40,54 +40,56 @@ export default function SearchInput(props: SearchInputProps) {
 
   useEffect(() => {
     if (!suggestions?.length && typeaheadListRef.current) {
-      typeaheadListRef.current.style.display = 'none';
+      typeaheadListRef.current.style.display = "none";
     }
-
   }, [suggestions]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (searchRef.current) searchRef.current.value = e.target.value;
     // for 2a
     setSearchString(e.target.value);
+    if (suggestions && suggestions?.length > 0 && typeaheadListRef.current) {
+      typeaheadListRef.current.style.display = "block";
+    }
   };
 
   const handleSuggestionClick = (suggestion: string) => {
-    if (searchRef.current) searchRef.current.value = suggestion;
-    if (typeaheadListRef.current) typeaheadListRef.current.style.display = 'none';
-    setSearchString("");
+    if (typeaheadListRef.current)
+      typeaheadListRef.current.style.display = "none";
 
     // for 2b
     onSearch(suggestion);
+    setSearchString(suggestion);
   };
 
   const handleClearInput = () => {
     setSearchString("");
-    if (typeaheadListRef.current) typeaheadListRef.current.style.display = 'none';
+    if (typeaheadListRef.current)
+      typeaheadListRef.current.style.display = "none";
     if (searchRef.current) {
       searchRef.current.focus();
-      searchRef.current.value = "";
     }
   };
 
   // to handler 2d
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     let newIndex;
-
     if (!suggestions) return;
 
     switch (e.key) {
       case "Escape":
-        if (typeaheadListRef.current) typeaheadListRef.current.style.display = 'none';
+        if (typeaheadListRef.current)
+          typeaheadListRef.current.style.display = "none";
         setSearchString("");
         break;
       case "Enter":
         // extend the default submit form
-        if (suggestions.length > 0 && suggestionIndex >= 0) {
-          searchRef.current!.value = suggestions[suggestionIndex];
+        if (typeaheadListRef.current)
+          typeaheadListRef.current.style.display = "none";
+        if (suggestionIndex != -1) {
+          setSearchString(suggestions[suggestionIndex]);
+          onSearch(suggestions[suggestionIndex]);
+          setSuggestionIndex(-1);
         }
-        if (typeaheadListRef.current) typeaheadListRef.current.style.display = 'none';
-        setSearchString("");
-        setSuggestionIndex(-1);
         break;
       case "ArrowUp":
         e.preventDefault();
@@ -114,9 +116,10 @@ export default function SearchInput(props: SearchInputProps) {
       className="relative w-full flex"
       onSubmit={(e: React.FormEvent) => {
         e.preventDefault();
-        setSearchString("");
-        if (typeaheadListRef.current) typeaheadListRef.current.style.display = 'none';
-        onSearch(searchRef.current?.value || "");
+        if (typeaheadListRef.current)
+          typeaheadListRef.current.style.display = "none";
+        setSuggestionIndex(-1);
+        onSearch(searchString);
       }}
     >
       <div className="relative grow">
@@ -125,9 +128,10 @@ export default function SearchInput(props: SearchInputProps) {
           placeholder="search something..."
           onKeyDown={handleKeyDown}
           aria-label="search-input"
+          value={searchString}
           ref={searchRef}
         />
-        {searchRef.current && searchRef.current.value.length >= 1 && (
+        {searchString.length >= 1 && (
           <button
             type="button"
             className="absolute inset-y-0 right-4 flex items-center justify-center text-gray-500 hover:text-gray-700 focus:outline-'none'"
@@ -153,10 +157,7 @@ export default function SearchInput(props: SearchInputProps) {
                 onMouseEnter={() => setSuggestionIndex(index)}
                 onMouseDown={(e) => e.preventDefault()} // Prevent blur on click
               >
-                {highlighText(
-                  suggestion,
-                  searchRef.current ? searchRef.current.value : ""
-                )}
+                {highlighText(suggestion, searchString)}
               </li>
             ))}
           </ul>

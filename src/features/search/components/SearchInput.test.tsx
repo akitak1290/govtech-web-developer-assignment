@@ -76,8 +76,6 @@ describe("SearchInput Component", () => {
     const listItems = screen.getAllByRole("listitem");
     expect(listItems[0]).toHaveTextContent("apple");
 
-    // fireEvent.click(listItems[0]);
-
     fireEvent.keyDown(input, { key: "ArrowDown" });
     expect(listItems[0]).toHaveClass("bg-blue-100");
 
