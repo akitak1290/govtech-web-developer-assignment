@@ -49,7 +49,7 @@ describe(SearchResult, () => {
   it("should display no results found when the result is empty", () => {
     (useSearchFetch as jest.Mock).mockReturnValue({ data: null });
 
-    const searchString = "";
+    const searchString = "asdf";
     render(<SearchResult searchString={searchString} />);
 
     expect(screen.getByText("No results found")).toBeInTheDocument();

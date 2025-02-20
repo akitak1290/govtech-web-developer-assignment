@@ -48,6 +48,7 @@ export default function useSearchFetch(searchString: string) {
     }
 
     const getData = async () => {
+      clearError();
       setLoading(true);
       const { data, error } = await getSearchResult(searchString);
 

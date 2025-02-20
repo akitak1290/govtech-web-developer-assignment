@@ -76,6 +76,9 @@ Test library used:
 **Search result**\
 ![reach_result](/docs/search_result.png)
 
+**Network error**\
+![network_error](/docs/network_error.png)
+
 ### Responsiveness
 
 **Typeahead mobile**\

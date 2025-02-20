@@ -43,7 +43,6 @@ export default function SearchResult(props: SearchResultProps) {
     <div>
       {error && <p>{error}</p>}
       {loading && <p>Loading...</p>}
-      {searchString !== "" && !data && !loading && <p>No results found</p>}
       {data && data.TotalNumberOfResults > 0 && (
         <div>
           <p className="font-bold py-8 text-xl">
@@ -79,6 +78,10 @@ export default function SearchResult(props: SearchResultProps) {
             );
           })}
         </div>
+      )}
+
+      {searchString !== "" && !data && !loading && !error && (
+        <p>No results found</p>
       )}
     </div>
   );
